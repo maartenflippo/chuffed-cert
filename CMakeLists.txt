@@ -10,18 +10,19 @@ set(chuffed_VERSION_PATCH 2)
 option(STATIC "compile with the -static linker flag" OFF)
 option(CP_PROFILER "Build with the CP Profiler Integration" ON)
 option(SUPPORT_VAR_IMPACT "Build with support for impact branching" OFF)
+option(PROOF_LOGGING "Build with support for proof logging" OFF)
 # ------------- Compiler Configuration -------------
 
 if(STATIC)
-  set(CMAKE_EXE_LINKER_FLAGS "-static")
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
 
 set(DEFAULT_BUILD_TYPE "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
-  set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
+    set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE STRING "Choose the type of build." FORCE)
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug"
     "Release"
     "MinSizeRel"
@@ -30,9 +31,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 if(APPLE)
-  execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE OSX_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(CMAKE_OSX_SYSROOT ${OSX_SYSROOT})
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+    execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE OSX_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(CMAKE_OSX_SYSROOT ${OSX_SYSROOT})
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 endif(APPLE)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -42,7 +43,7 @@ find_package(Threads)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 if(WIN32)
-  add_definitions(-DYY_NO_UNISTD_H)
+    add_definitions(-DYY_NO_UNISTD_H)
 endif()
 
 # ------------- CP Profiler Integration -------------
@@ -59,8 +60,8 @@ set_target_properties(thirdparty_cp_profiler PROPERTIES
 # ---------- Support for impact branching -----------
 
 if(SUPPORT_VAR_IMPACT)
-  add_definitions(-DHAS_VAR_IMPACT)
-  set(VAR_IMPACT_SOURCES
+    add_definitions(-DHAS_VAR_IMPACT)
+    set(VAR_IMPACT_SOURCES
     chuffed/branching/impact.cpp
   )
 endif()
@@ -74,6 +75,14 @@ add_library(thirdparty_murmur OBJECT
 set_target_properties(thirdparty_murmur PROPERTIES
   CXX_CLANG_TIDY ""
 )
+
+# ------------- Support for proof logging -------------
+if(PROOF_LOGGING)
+    add_definitions(-DPROOF_LOGGING)
+    set(VAR_IMPACT_SOURCES
+    chuffed/proof-log/proof-log.cpp
+  )
+endif()
 
 # ------------- Main Chuffed Definition -------------
 
@@ -187,6 +196,7 @@ add_library(chuffed
   chuffed/core/sat-types.h
   chuffed/core/options.h
   chuffed/core/propagator.h
+  chuffed/proof-log/proof-log.h
   ${VAR_IMPACT_SOURCES}
 
   $<TARGET_OBJECTS:thirdparty_cp_profiler>
@@ -194,23 +204,23 @@ add_library(chuffed
 )
 
 if(CP_PROFILER)
-  target_compile_definitions(chuffed PRIVATE HAS_PROFILER)
+    target_compile_definitions(chuffed PRIVATE HAS_PROFILER)
 endif()
 
 # ------------- FZN Chuffed -------------
 
 find_package(BISON 3.4)
 if(BISON_FOUND)
-  file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/chuffed/flatzinc/generated_parser)
-  bison_target(FZNParser
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/chuffed/flatzinc/generated_parser)
+    bison_target(FZNParser
     ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/parser.yxx
     ${PROJECT_BINARY_DIR}/parser.tab.cpp
     DEFINES_FILE ${PROJECT_BINARY_DIR}/chuffed/flatzinc/generated_parser/parser.tab.h
     COMPILE_FLAGS "-l"
   )
 else()
-  message(WARNING "Bison cannot be run. Using cached file, which may be out of date.")
-  set(BISON_FZNParser_OUTPUTS
+    message(WARNING "Bison cannot be run. Using cached file, which may be out of date.")
+    set(BISON_FZNParser_OUTPUTS
     ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/generated_parser/parser.tab.cpp
     ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/generated_parser/parser.tab.h
   )
@@ -218,15 +228,15 @@ endif()
 
 find_package(FLEX)
 if(FLEX_FOUND AND BISON_FOUND)
-  flex_target(FZNLexer
+    flex_target(FZNLexer
     ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/lexer.lxx
     ${PROJECT_BINARY_DIR}/lexer.yy.cpp
     COMPILE_FLAGS "-L"
   )
-  add_flex_bison_dependency(FZNLexer FZNParser)
+    add_flex_bison_dependency(FZNLexer FZNParser)
 else()
-  message(WARNING "Flex cannot be run. Using cached file, which may be out of date.")
-  set(FLEX_FZNLexer_OUTPUTS ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/generated_parser/lexer.yy.cpp)
+    message(WARNING "Flex cannot be run. Using cached file, which may be out of date.")
+    set(FLEX_FZNLexer_OUTPUTS ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/generated_parser/lexer.yy.cpp)
 endif()
 
 # If CMAKE_UNITY_BUILD is enabled, we still want these files to be built separately
@@ -325,18 +335,18 @@ target_link_libraries(wreg_shift chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT})
 
 find_package(ZLIB)
 if(ZLIB_FOUND)
-  include_directories(${ZLIB_INCLUDE_DIRS})
+    include_directories(${ZLIB_INCLUDE_DIRS})
 
-  add_executable(cross EXCLUDE_FROM_ALL chuffed/examples/cross.cpp)
-  target_link_libraries(cross chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+    add_executable(cross EXCLUDE_FROM_ALL chuffed/examples/cross.cpp)
+    target_link_libraries(cross chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
 
-  add_executable(fdpent EXCLUDE_FROM_ALL chuffed/examples/fdpent.cpp)
-  target_link_libraries(fdpent chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+    add_executable(fdpent EXCLUDE_FROM_ALL chuffed/examples/fdpent.cpp)
+    target_link_libraries(fdpent chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
 
-  add_executable(nurse EXCLUDE_FROM_ALL chuffed/examples/nurse.cpp)
-  target_link_libraries(nurse chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+    add_executable(nurse EXCLUDE_FROM_ALL chuffed/examples/nurse.cpp)
+    target_link_libraries(nurse chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
 
-  set(ZLIB_EXAMPLES
+    set(ZLIB_EXAMPLES
     cross
     fdpent
     nurse
@@ -415,25 +425,25 @@ install(
 
 # ------------- TARGET format -------------
 if (NOT CLANG_FORMAT_EXECUTABLE)
-  find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format clang-format-11 clang-format-10 clang-format-9)
+    find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format clang-format-11 clang-format-10 clang-format-9)
 endif()
 
 set(CLANG_FORMAT_FLAGS "-i" CACHE STRING "Flags passed to the clang-format executable")
 
 if (CLANG_FORMAT_EXECUTABLE)
-  file(GLOB_RECURSE FORMAT_FILES
+    file(GLOB_RECURSE FORMAT_FILES
     ${PROJECT_SOURCE_DIR}/*.c
     ${PROJECT_SOURCE_DIR}/*.cpp
     ${PROJECT_SOURCE_DIR}/*.h
     ${PROJECT_SOURCE_DIR}/*.hh
     ${PROJECT_SOURCE_DIR}/*.hpp
   )
-  list(FILTER FORMAT_FILES EXCLUDE REGEX ${PROJECT_BINARY_DIR}/*)
-  list(FILTER FORMAT_FILES EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/thirdparty/*)
-  list(FILTER FORMAT_FILES EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/generated_parser/*)
+    list(FILTER FORMAT_FILES EXCLUDE REGEX ${PROJECT_BINARY_DIR}/*)
+    list(FILTER FORMAT_FILES EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/thirdparty/*)
+    list(FILTER FORMAT_FILES EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/chuffed/flatzinc/generated_parser/*)
 
-  separate_arguments(CLANG_FORMAT_FLAGS_LIST NATIVE_COMMAND ${CLANG_FORMAT_FLAGS})
-  add_custom_target(format
+    separate_arguments(CLANG_FORMAT_FLAGS_LIST NATIVE_COMMAND ${CLANG_FORMAT_FLAGS})
+    add_custom_target(format
     COMMAND ${CLANG_FORMAT_EXECUTABLE} ${CLANG_FORMAT_FLAGS_LIST} ${FORMAT_FILES}
     COMMENT "Running ${CLANG_FORMAT_EXECUTABLE} on all source files"
   )

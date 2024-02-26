@@ -9,6 +9,8 @@
 #include <chuffed/ldsb/ldsb.h>
 #include <chuffed/mip/mip.h>
 
+#include "chuffed/proof-log/proof-log.h"
+
 #include <cassert>
 #include <cstdio>
 #include <fstream>
@@ -1144,6 +1146,10 @@ void Engine::solve(Problem* p, const std::string& problemLabel) {
 			learntStatsStream << "\n";
 		}
 	}
+
+#ifdef PROOF_LOGGING
+	proof_log::finalize();
+#endif
 
 #ifdef HAS_PROFILER
 	if (doProfiling()) {

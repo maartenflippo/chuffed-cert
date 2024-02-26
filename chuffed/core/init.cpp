@@ -5,6 +5,7 @@
 #include <chuffed/core/sat.h>
 #include <chuffed/ldsb/ldsb.h>
 #include <chuffed/mip/mip.h>
+#include <chuffed/proof-log/proof-log.h>
 
 #include <cassert>
 #include <cstdio>
@@ -72,6 +73,11 @@ void Engine::init() {
 	if (so.mip) {
 		mip->presolve();
 	}
+
+	// Set up proof logging.
+#ifdef PROOF_LOGGING
+	proof_log::init();
+#endif
 
 	// Ready
 

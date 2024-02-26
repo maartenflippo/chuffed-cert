@@ -144,6 +144,11 @@ public:
 	int cpprofiler_port;
 #endif
 
+#ifdef PROOF_LOGGING
+	std::string proof_file{"proof.drap"};  // the name of the proof file
+	bool proof_skeleton{true};             // Whether to only generate the proof skeleton.
+#endif
+
 	Options();
 };
 

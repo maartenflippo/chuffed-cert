@@ -4,6 +4,7 @@
 #include <chuffed/core/propagator.h>
 #include <chuffed/core/sat.h>
 #include <chuffed/ldsb/ldsb.h>
+#include <chuffed/proof-log/proof-log.h>
 
 #include <algorithm>
 #include <cassert>
@@ -186,6 +187,10 @@ void SAT::analyze(int nodeid, std::set<int>& contributingNogoods) {
 		rtrail.last().push(c);
 	}
 
+#ifdef PROOF_LOGGING
+	proof_log::resolve(c);
+#endif
+
 	enqueue(out_learnt[0], (so.bin_clause_opt && c->size() == 2) ? Reason(out_learnt[1]) : c);
 
 	if (PRINT_ANALYSIS) {
@@ -238,6 +243,10 @@ void SAT::getLearntClause(int nodeid, std::set<int>& contributingNogoods) {
 		assert(expl != nullptr);  // (otherwise should be UIP)
 		Clause& c = *expl;
 
+#ifdef PROOF_LOGGING
+		proof_log::intro(&c);
+#endif
+
 		if (PRINT_ANALYSIS) {
 			if (p != lit_Undef) {
 				c[0] = p;
@@ -255,7 +264,8 @@ void SAT::getLearntClause(int nodeid, std::set<int>& contributingNogoods) {
 		/*   if (p == lit_Undef) { */
 		/*     std::cerr << "explaining away failure (" << decisionLevel() << ")\n"; */
 		/*   } else { */
-		/*     std::cerr << "explaining away " << getLitString(toInt(p)) << " (lit number " << toInt(p)
+		/*     std::cerr << "explaining away " << getLitString(toInt(p)) << " (lit number " <<
+		 * toInt(p)
 		 * << ", level " << getLevel(var(p)) << ")\n"; */
 		/*   } */
 		/*   std::cerr << "expl:"; */

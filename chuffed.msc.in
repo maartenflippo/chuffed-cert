@@ -1,13 +1,15 @@
 {
   "id": "org.chuffed.chuffed",
-  "name": "Chuffed",
-  "description": "Chuffed FlatZinc executable",
+  "name": "Chuffed Cert",
+  "description": "Chuffed FlatZinc with proof logging",
   "version": "${chuffed_VERSION_MAJOR}.${chuffed_VERSION_MINOR}.${chuffed_VERSION_PATCH}",
   "mznlib": "../chuffed",
   "executable": "${REL_INSTALL_BINARY}",
   "tags": ["cp","lcg","int"],
   "stdFlags": ["-a","-f","-n","-r","-s","-t","-v","--cp-profiler"],
   "extraFlags": [
+    ["--proof", "File to generate the proof in.", "string", "false", "proof.drap"],
+    ["--with-lemmas", "Generate the proof with lemma's.", "bool", "false"],
     ["--prop-fifo", "Use FIFO queues for propagation", "bool", "false"],
     ["--vsids", "Use activity-based search on the Boolean variables", "bool", "false"],
     ["--toggle-vsids", "Alternate search between user-specified and activity-based one", "bool", "false"],

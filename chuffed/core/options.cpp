@@ -297,6 +297,14 @@ void printHelp(int& argc, char**& argv, const std::string& fileExt) {
 							 "  -cpprofiler id,port\n"
 							 "     Send search to CP Profiler with the given execution ID and port.\n"
 #endif
+#ifdef PROOF_LOGGING
+							 "\n"
+							 "Proof Logging:\n"
+							 "  --proof file_name\n"
+							 "    Specify where the proof file should be.\n"
+							 "  --with-lemmas\n"
+							 "    Indicate whether proof lemma's should be included (default false).\n"
+#endif
 							 "\n";
 }
 
@@ -708,6 +716,12 @@ void parseOptions(int& argc, char**& argv, std::string* fileArg, const std::stri
 			} else {
 				CHUFFED_ERROR("Invalid value for --cp-profiler.");
 			}
+#endif
+#ifdef PROOF_LOGGING
+		} else if (cop.get("--proof", &stringBuffer)) {
+			so.proof_file = stringBuffer;
+		} else if (cop.get("--with-lemmas")) {
+			so.proof_skeleton = false;
 #endif
 		} else if (argv[i][0] == '-') {
 			std::cerr << argv[0] << ": unrecognized option " << argv[i] << "\n";
