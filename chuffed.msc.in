@@ -8,7 +8,7 @@
   "tags": ["cp","lcg","int"],
   "stdFlags": ["-a","-f","-n","-r","-s","-t","-v","--cp-profiler"],
   "extraFlags": [
-    ["--proof", "File to generate the proof in.", "string", "false", "proof.drap"],
+    ["--proof", "File to generate the proof in.", "string", "proof.drap"],
     ["--with-lemmas", "Generate the proof with lemma's.", "bool", "false"],
     ["--prop-fifo", "Use FIFO queues for propagation", "bool", "false"],
     ["--vsids", "Use activity-based search on the Boolean variables", "bool", "false"],
