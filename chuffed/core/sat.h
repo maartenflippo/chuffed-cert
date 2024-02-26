@@ -6,8 +6,6 @@
 #include <chuffed/support/heap.h>
 #include <chuffed/support/misc.h>
 
-#include <climits>
-#include <cmath>
 #include <cstdint>
 #include <map>
 #include <set>

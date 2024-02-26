@@ -1,5 +1,5 @@
 {
-  "id": "org.chuffed.chuffed",
+  "id": "org.chuffed.chuffed-cert",
   "name": "Chuffed Cert",
   "description": "Chuffed FlatZinc with proof logging",
   "version": "${chuffed_VERSION_MAJOR}.${chuffed_VERSION_MINOR}.${chuffed_VERSION_PATCH}",

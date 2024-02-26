@@ -3,8 +3,6 @@
 
 #include <chuffed/support/misc.h>
 
-#include <cstdlib>
-#include <cstring>
 #include <string>
 
 // When enabled, there is a command-line option -phase_saving=n, defaults to

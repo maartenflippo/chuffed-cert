@@ -188,7 +188,7 @@ void SAT::analyze(int nodeid, std::set<int>& contributingNogoods) {
 	}
 
 #ifdef PROOF_LOGGING
-	proof_log::resolve(c);
+	proof_log::resolve(*c);
 #endif
 
 	enqueue(out_learnt[0], (so.bin_clause_opt && c->size() == 2) ? Reason(out_learnt[1]) : c);
@@ -244,7 +244,7 @@ void SAT::getLearntClause(int nodeid, std::set<int>& contributingNogoods) {
 		Clause& c = *expl;
 
 #ifdef PROOF_LOGGING
-		proof_log::intro(&c);
+		proof_log::intro(c);
 #endif
 
 		if (PRINT_ANALYSIS) {

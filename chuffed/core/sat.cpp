@@ -3,6 +3,7 @@
 #include <chuffed/core/propagator.h>
 #include <chuffed/core/sat.h>
 #include <chuffed/mip/mip.h>
+#include <chuffed/proof-log/proof-log.h>
 
 #include <algorithm>
 #include <cassert>
@@ -300,6 +301,10 @@ void SAT::removeClause(Clause& c) {
 	} else {
 		clauses_literals -= c.size();
 	}
+
+#ifdef PROOF_LOGGING
+	proof_log::del(c);
+#endif
 
 	if (c.learnt) {
 		for (int i = 0; i < c.size(); i++) {

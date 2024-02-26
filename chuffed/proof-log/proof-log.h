@@ -16,13 +16,20 @@ void init();
  * Introduce a clause which is used in conflict analysis. The ID of the clause
  * will be used in the first `resolve()` call, as one of the antecedents.
  */
-void intro(Clause* cl);
+void intro(Clause& cl);
 
 /**
  * Add a resolve step to the proof log. This will use the antecedents to
  * introduce the required clauses for cl to be RUP.
  */
-void resolve(Clause* cl);
+void resolve(Clause& cl);
+
+/**
+ * Indicate the given clause is deleted.
+ *
+ * It is expected that `resolve` has been called with this clause previously.
+ */
+void del(Clause& cl);
 
 /**
  * Finish logging and clean up resources, to prepare for process exit.

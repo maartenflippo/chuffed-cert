@@ -9,23 +9,41 @@
 
 static std::ofstream log_file;
 
+struct encountered_atom {
+	bool is_bound{false};
+	int var{0};
+};
+
+static std::vector<bool> encountered_vars;
+
 void proof_log::init() { log_file.open(so.proof_file, std::ios::out); }
 
-static void log_literals(Clause* cl) {
-	for (int ii = 0; ii < cl->size(); ii++) {
-		Lit l((*cl)[ii]);
+static void encountered_variable(int variable) {
+	if (encountered_vars.size() <= variable) {
+		encountered_vars.resize(variable + 1);
+	}
+
+	encountered_vars[variable] = true;
+}
+
+static void log_literals(Clause& cl) {
+	for (int ii = 0; ii < cl.size(); ii++) {
+		Lit l(cl[ii]);
+
+		encountered_variable(var(l));
+
 		log_file << (sign(l) ? "" : "-") << var(l) + 1 << " ";
 	}
 }
 
-void proof_log::intro(Clause* cl) {
+void proof_log::intro(Clause& cl) {
 	if (so.proof_skeleton) {
 		return;
 	}
 
 	// If this is a learnt clause, we will have logged it with resolve(), and
 	// it will have a valid clause ID.
-	if (cl->learnt) {
+	if (cl.learnt) {
 		return;
 	}
 
@@ -34,16 +52,24 @@ void proof_log::intro(Clause* cl) {
 	log_file << std::endl;
 }
 
-void proof_log::resolve(Clause* cl) {
-	log_file << "r " << cl->clauseID() << " ";
+void proof_log::resolve(Clause& cl) {
+	log_file << "r " << cl.clauseID() << " ";
 	log_literals(cl);
 	log_file << std::endl;
 }
 
+void proof_log::del(Clause& cl) { log_file << "d " << cl.clauseID() << std::endl; }
+
 static void print_literal_atom_mapping() {
-	for (int lit = 0; lit < sat.assigns.size(); lit++) {
-		const auto& atomic_constraint = getLitString(lit);
-		log_file << lit << " " << atomic_constraint << std::endl;
+	for (int variable = 0; variable < encountered_vars.size(); variable++) {
+		if (!encountered_vars[variable]) {
+			continue;
+		}
+
+		Lit l(variable, true);
+
+		const auto& atomic_constraint = getLitString(toInt(l));
+		log_file << variable << " " << atomic_constraint << std::endl;
 	}
 }
 
