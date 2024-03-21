@@ -14,25 +14,32 @@ struct encountered_atom {
 	int var{0};
 };
 
-static std::vector<bool> encountered_vars;
+static std::vector<unsigned int> encountered_vars;
+static unsigned int next_variable_id = 1;
 
 void proof_log::init() { log_file.open(so.proof_file, std::ios::out); }
 
-static void encountered_variable(int variable) {
+static int encounter_lit(Lit lit) {
+	auto variable = var(lit);
+
 	if (encountered_vars.size() <= variable) {
 		encountered_vars.resize(variable + 1);
 	}
 
-	encountered_vars[variable] = true;
+	if (encountered_vars[variable] == 0) {
+		encountered_vars[variable] = next_variable_id++;
+	}
+
+	auto variable_code = static_cast<int>(encountered_vars[variable]);
+	return sign(lit) ? variable_code : -variable_code;
 }
 
 static void log_literals(Clause& cl) {
 	for (int ii = 0; ii < cl.size(); ii++) {
 		Lit l(cl[ii]);
 
-		encountered_variable(var(l));
-
-		log_file << (sign(l) ? "" : "-") << var(l) + 1 << " ";
+		auto code = encounter_lit(l);
+		log_file << " " << code;
 	}
 }
 
@@ -47,13 +54,13 @@ void proof_log::intro(Clause& cl) {
 		return;
 	}
 
-	log_file << "i ";
+	log_file << "l ";
 	log_literals(cl);
 	log_file << std::endl;
 }
 
 void proof_log::resolve(Clause& cl) {
-	log_file << "r " << cl.clauseID() << " ";
+	log_file << "r " << cl.clauseID();
 	log_literals(cl);
 	log_file << std::endl;
 }
@@ -61,23 +68,52 @@ void proof_log::resolve(Clause& cl) {
 void proof_log::del(Clause& cl) { log_file << "d " << cl.clauseID() << std::endl; }
 
 static void print_literal_atom_mapping() {
+	std::ofstream map_file;
+	map_file.open(so.proof_map_file, std::ios::out);
+
 	for (int variable = 0; variable < encountered_vars.size(); variable++) {
-		if (!encountered_vars[variable]) {
+		if (encountered_vars[variable] == 0) {
 			continue;
 		}
 
 		Lit l(variable, true);
 
 		const auto& atomic_constraint = getLitString(toInt(l));
-		log_file << variable << " " << atomic_constraint << std::endl;
+		map_file << encountered_vars[variable] << " " << atomic_constraint << std::endl;
+	}
+
+	map_file.close();
+}
+
+static void print_conclusion(proof_log::Conclusion conclusion) {
+	if (conclusion.is_unsatisfiable()) {
+		log_file << "c UNSAT" << std::endl;
+	} else {
+		auto lit = conclusion.objective_bound_lit();
+		auto code = encounter_lit(lit);
+
+		log_file << "c " << code << std::endl;
 	}
 }
 
-void proof_log::finalize() {
-	log_file << "m" << std::endl;
-	print_literal_atom_mapping();
+void proof_log::finalize(proof_log::Conclusion conclusion) {
+	print_conclusion(conclusion);
 
 	log_file.close();
+	print_literal_atom_mapping();
+}
+
+proof_log::Conclusion proof_log::Conclusion::optimal(Lit bounds_lit) {
+	Conclusion conclusion;
+	conclusion.is_unsat = false;
+	conclusion.lit = bounds_lit;
+	return conclusion;
+}
+
+proof_log::Conclusion proof_log::Conclusion::unsatisfiable() {
+	Conclusion conclusion;
+	conclusion.is_unsat = true;
+	return conclusion;
 }
 
 #endif

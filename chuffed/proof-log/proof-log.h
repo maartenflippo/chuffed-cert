@@ -7,6 +7,29 @@
 
 namespace proof_log {
 
+struct Conclusion {
+private:
+	bool is_unsat{false};
+	Lit lit{};
+
+	Conclusion() = default;
+
+public:
+	/**
+	 * Create a conclusion which states the problem is unsatisfiable.
+	 */
+	static Conclusion unsatisfiable();
+
+	/**
+	 * Create a conclusion which states the given literal asserts the lower bound
+	 * of the objective value.
+	 */
+	static Conclusion optimal(Lit bounds_lit);
+
+	bool is_unsatisfiable() const { return is_unsat; }
+	Lit objective_bound_lit() const { return lit; }
+};
+
 /**
  * Setup state to support proof logging.
  */
@@ -34,7 +57,7 @@ void del(Clause& cl);
 /**
  * Finish logging and clean up resources, to prepare for process exit.
  */
-void finalize();
+void finalize(Conclusion conclusion);
 
 };  // namespace proof_log
 

@@ -1128,8 +1128,18 @@ void Engine::solve(Problem* p, const std::string& problemLabel) {
 	if (status == RES_GUN || status == RES_LUN) {
 		if (solutions > 0) {
 			(*output_stream) << "==========\n";
+
+#ifdef PROOF_LOGGING
+			Lit optimal_bound =
+					opt_type == OPT_MIN ? opt_var->getLit(best_sol, LR_GE) : opt_var->getLit(best_sol, LR_LE);
+			proof_log::finalize(proof_log::Conclusion::optimal(optimal_bound));
+#endif
 		} else {
 			(*output_stream) << "=====UNSATISFIABLE=====\n";
+
+#ifdef PROOF_LOGGING
+			proof_log::finalize(proof_log::Conclusion::unsatisfiable());
+#endif
 		}
 	}
 
@@ -1145,10 +1155,6 @@ void Engine::solve(Problem* p, const std::string& problemLabel) {
 			learntStatsStream << "\n";
 		}
 	}
-
-#ifdef PROOF_LOGGING
-	proof_log::finalize();
-#endif
 
 #ifdef HAS_PROFILER
 	if (doProfiling()) {
