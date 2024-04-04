@@ -244,7 +244,9 @@ void SAT::getLearntClause(int nodeid, std::set<int>& contributingNogoods) {
 		Clause& c = *expl;
 
 #ifdef PROOF_LOGGING
-		proof_log::intro(c);
+		if (expl != confl) {
+			proof_log::intro(c);
+		}
 #endif
 
 		if (PRINT_ANALYSIS) {

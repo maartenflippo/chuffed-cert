@@ -4,6 +4,7 @@
 #include <chuffed/support/vec.h>
 
 #include <fstream>
+#include <iostream>
 
 #ifdef PROOF_LOGGING
 
@@ -16,6 +17,10 @@ struct encountered_atom {
 
 static std::vector<unsigned int> encountered_vars;
 static unsigned int next_variable_id = 1;
+
+static size_t num_inferences = 0;
+static size_t num_lemmas = 0;
+static size_t num_deletions = 0;
 
 void proof_log::init() { log_file.open(so.proof_file, std::ios::out); }
 
@@ -44,6 +49,8 @@ static void log_literals(Clause& cl) {
 }
 
 void proof_log::intro(Clause& cl) {
+	num_lemmas += 1;
+
 	if (so.proof_skeleton) {
 		return;
 	}
@@ -60,12 +67,17 @@ void proof_log::intro(Clause& cl) {
 }
 
 void proof_log::resolve(Clause& cl) {
+	num_inferences += 1;
+
 	log_file << "r " << cl.clauseID();
 	log_literals(cl);
 	log_file << std::endl;
 }
 
-void proof_log::del(Clause& cl) { log_file << "d " << cl.clauseID() << std::endl; }
+void proof_log::del(Clause& cl) {
+	num_deletions += 1;
+	log_file << "d " << cl.clauseID() << std::endl;
+}
 
 static void print_literal_atom_mapping() {
 	std::ofstream map_file;
@@ -101,6 +113,10 @@ void proof_log::finalize(proof_log::Conclusion conclusion) {
 
 	log_file.close();
 	print_literal_atom_mapping();
+
+	std::cout << "% num_lemmas: " << num_lemmas << std::endl;
+	std::cout << "% num_inferences: " << num_inferences << std::endl;
+	std::cout << "% num_deletions: " << num_deletions << std::endl;
 }
 
 proof_log::Conclusion proof_log::Conclusion::optimal(Lit bounds_lit) {
