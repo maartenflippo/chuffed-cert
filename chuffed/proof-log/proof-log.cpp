@@ -79,9 +79,24 @@ void proof_log::del(Clause& cl) {
 	log_file << "d " << cl.clauseID() << std::endl;
 }
 
+static bool replace(std::string& str, const std::string& from, const std::string& to) {
+	size_t start_pos = str.find(from);
+	if (start_pos == std::string::npos) {
+		return false;
+	}
+
+	str.replace(start_pos, from.length(), to);
+	return true;
+}
+
 static void print_literal_atom_mapping() {
 	std::ofstream map_file;
-	map_file.open(so.proof_map_file, std::ios::out);
+
+	auto map_file_name = so.proof_file;
+	if (!replace(map_file_name, ".drap", ".lits")) {
+		map_file_name.append(".lits");
+	}
+	map_file.open(map_file_name, std::ios::out);
 
 	for (int variable = 0; variable < encountered_vars.size(); variable++) {
 		if (encountered_vars[variable] == 0) {

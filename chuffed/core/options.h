@@ -143,9 +143,8 @@ public:
 #endif
 
 #ifdef PROOF_LOGGING
-	std::string proof_file{"proof.drap"};     // the name of the proof file
-	std::string proof_map_file{"proof.map"};  // the name of the mapping file
-	bool proof_skeleton{true};                // Whether to only generate the proof skeleton.
+	std::string proof_file{"proof.drap"};  // the name of the proof file
+	bool proof_skeleton{true};             // Whether to only generate the proof skeleton.
 #endif
 
 	Options();
