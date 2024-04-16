@@ -59,6 +59,11 @@ void del(Clause& cl);
  */
 void finalize(Conclusion conclusion);
 
+/**
+ * Get the number of seconds spent logging.
+ */
+float get_total_logging_time_seconds();
+
 };  // namespace proof_log
 
 #endif

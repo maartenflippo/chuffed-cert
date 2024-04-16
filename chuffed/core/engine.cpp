@@ -1143,6 +1143,8 @@ void Engine::solve(Problem* p, const std::string& problemLabel) {
 		}
 	}
 
+	std::cout << "% logging_time: " << proof_log::get_total_logging_time_seconds() << std::endl;
+
 	if (so.learnt_stats) {
 		for (int i = 0; i < sat.learnts.size(); i++) {
 			Clause& c = *(sat.learnts[i]);

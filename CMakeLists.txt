@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.5.0)
 
-project(chuffed CXX C)
+project(chuffed_cert CXX C)
 # The version number.
-set(chuffed_VERSION_MAJOR 0)
-set(chuffed_VERSION_MINOR 13)
-set(chuffed_VERSION_PATCH 2)
+set(chuffed_cert_VERSION_MAJOR 0)
+set(chuffed_cert_VERSION_MINOR 13)
+set(chuffed_cert_VERSION_PATCH 2)
 
 ### Additional Definitions:
 option(STATIC "compile with the -static linker flag" OFF)
@@ -265,8 +265,8 @@ add_library(chuffed_fzn
   $<TARGET_OBJECTS:flatzinc_parser>
 )
 
-add_executable(fzn-chuffed chuffed/flatzinc/fzn-chuffed.cpp)
-target_link_libraries(fzn-chuffed chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT})
+add_executable(fzn-chuffed-cert chuffed/flatzinc/fzn-chuffed.cpp)
+target_link_libraries(fzn-chuffed-cert chuffed_fzn chuffed ${CMAKE_THREAD_LIBS_INIT})
 
 # ------------- Chuffed Examples -------------
 
@@ -382,10 +382,10 @@ add_dependencies(examples
 # ------------- TARGET install -------------
 include(GNUInstallDirs)
 
-file(RELATIVE_PATH REL_INSTALL_BINARY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/minizinc/solvers ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/fzn-chuffed)
-configure_file(chuffed.msc.in chuffed.msc)
+file(RELATIVE_PATH REL_INSTALL_BINARY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/minizinc/solvers ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/fzn-chuffed-cert)
+configure_file(chuffed-cert.msc.in chuffed-cert.msc)
 
-install(TARGETS fzn-chuffed RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS fzn-chuffed-cert RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
   TARGETS chuffed chuffed_fzn
   EXPORT chuffed-targets

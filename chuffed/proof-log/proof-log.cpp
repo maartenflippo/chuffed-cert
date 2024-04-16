@@ -3,10 +3,16 @@
 #include <chuffed/core/sat.h>
 #include <chuffed/support/vec.h>
 
+#include <ctime>
 #include <fstream>
 #include <iostream>
 
 #ifdef PROOF_LOGGING
+
+#define START() std::clock_t start_clock_time = std::clock()
+#define END(accumulator)                      \
+	std::clock_t end_clock_time = std::clock(); \
+	accumulator += (float)(end_clock_time - start_clock_time) / (float)CLOCKS_PER_SEC
 
 static std::ofstream log_file;
 
@@ -21,6 +27,8 @@ static unsigned int next_variable_id = 1;
 static size_t num_inferences = 0;
 static size_t num_lemmas = 0;
 static size_t num_deletions = 0;
+
+static float logging_time = 0;
 
 void proof_log::init() { log_file.open(so.proof_file, std::ios::out); }
 
@@ -67,16 +75,20 @@ void proof_log::intro(Clause& cl) {
 }
 
 void proof_log::resolve(Clause& cl) {
+	START();
 	num_inferences += 1;
 
 	log_file << "r " << cl.clauseID();
 	log_literals(cl);
 	log_file << std::endl;
+	END(logging_time);
 }
 
 void proof_log::del(Clause& cl) {
+	START();
 	num_deletions += 1;
 	log_file << "d " << cl.clauseID() << std::endl;
+	END(logging_time);
 }
 
 static bool replace(std::string& str, const std::string& from, const std::string& to) {
@@ -124,15 +136,19 @@ static void print_conclusion(proof_log::Conclusion conclusion) {
 }
 
 void proof_log::finalize(proof_log::Conclusion conclusion) {
+	START();
 	print_conclusion(conclusion);
 
 	log_file.close();
 	print_literal_atom_mapping();
+	END(logging_time);
 
 	std::cout << "% num_lemmas: " << num_lemmas << std::endl;
 	std::cout << "% num_inferences: " << num_inferences << std::endl;
 	std::cout << "% num_deletions: " << num_deletions << std::endl;
 }
+
+float proof_log::get_total_logging_time_seconds() { return logging_time; }
 
 proof_log::Conclusion proof_log::Conclusion::optimal(Lit bounds_lit) {
 	Conclusion conclusion;
